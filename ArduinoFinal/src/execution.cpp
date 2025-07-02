@@ -45,6 +45,7 @@ void Keyboard_loop()
                         break;
                     case 2:
                         Keyboard.write(KEY_F);
+                        
                         ExeCurtState = OpeningFileSelectMenuState;
                         break;
                     case 3:
