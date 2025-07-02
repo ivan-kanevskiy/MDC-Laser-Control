@@ -21,5 +21,5 @@
 #define NumberOfProgramsNames 10
 #define ProgramNameStaringRegister 110
 #define ProgramNameLength 20
-#define EmulatorControlAdrees 434
+#define HMIExecMenuControlButtons 434
 #endif

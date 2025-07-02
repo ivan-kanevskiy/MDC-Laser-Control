@@ -1,41 +1,67 @@
 #include "modbusHandler.h"
 #include "modbusFiles.h"
 #include "main.h"
-int numFiles = 0;
-int numRepetition = 0;
-String allFilenames[10];
-int allRepetition[10];
+
+#define MaxRecCnt 10
+
+
+uint16_t numFiles = 0;      // 
+// int numRepetition = 0; // 
+
+uint16_t allRepetition[MaxRecCnt];
+String allFilenames[MaxRecCnt];
+
 String hexToAscii(String hexString);
 String decimalToHex(unsigned long decValue);
-void LoadFilesFromDisp();
+
+static void LoadFilesFromDisp();
+
+
 void loopFilesFromDisp()
 {
-    executeIfConditionIsTrue(Register(ReadCoils, SendDataButton), 1, LoadFilesFromDisp);
+    // check  "Send" button state
+    if(Register(ReadCoils, SendDataButton) == 1 )
+    {  // Pressed
+        // load data 
+        LoadFilesFromDisp();
+
+        Register(WriteCoils, SendDataButton, 0); // clear "Send" button state
+    }
+
+    // executeIfConditionIsTrue(Register(ReadCoils, SendDataButton), 1, LoadFilesFromDisp);
 }
+
 String ReadFileName(int FileIndex){
     return allFilenames[FileIndex];
 }
+
 int ReadFileRepetition(int FileIndex){
     return allRepetition[FileIndex];
 }
-void LoadFilesFromDisp()
+
+static void LoadFilesFromDisp()
 {
     int numberOfdata = 0;
     numFiles = 0;
-    numRepetition = 0;
-    for (int i = 0; i < 10; i++)
+    //numRepetition = 0;
+
+    //check how many rows are received from HMI 
+    // the value 0 means that an empy row is reached 
+    for (int i = 0; i < MaxRecCnt; i++)
     {
 
         if (Register(ReadHoldingRegisters, ProgramRepeatRegister + i) != 0)
         {
-            numberOfdata++;
+            numberOfdata++; // number of rows with  valid data 
         }
     }
+
     if (numberOfdata > 0)
     {
+        // extract data from each row 
         for (int i = 0; i < numberOfdata; i++)
         {
-            allRepetition[numRepetition] = Register(ReadHoldingRegisters, ProgramRepeatRegister + i);
+            allRepetition[i] = Register(ReadHoldingRegisters, ProgramRepeatRegister + i);
             String buf;
             // for (int j = ProgramNameStaringRegister + i * ProgramNameLength; j < (ProgramNameStaringRegister + ProgramNameLength) + i * ProgramNameLength; j++)
             //{
@@ -43,15 +69,17 @@ void LoadFilesFromDisp()
             //         break;
             //     buf += String(hexToAscii(decimalToHex(Register(ReadHoldingRegisters, j))));
             // }
+            
             for (int j = 0; j < ProgramNameLength; j++)
             {
+                
                 if (Register(ReadHoldingRegisters, ProgramNameRegister + j + ProgramNameLength * i) == 0)
                     break;
                 buf += String(hexToAscii(decimalToHex(Register(ReadHoldingRegisters, ProgramNameRegister + j + ProgramNameLength * i))));
             }
             allFilenames[numFiles] = buf;
             numFiles++;
-            numRepetition++;
+            //numRepetition++;
             rtt.println(buf);
         }
         for (int i = 0; i < 20; i++)
@@ -67,8 +95,10 @@ void LoadFilesFromDisp()
             }
         }
     }
-    Register(WriteCoils, SendDataButton, false);
+    
 }
+
+
 String decimalToHex(unsigned long decValue)
 {
     String hexString = "";

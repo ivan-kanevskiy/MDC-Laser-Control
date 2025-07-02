@@ -2,15 +2,36 @@
 #include "modbusHandler.h"
 #include "modbusFiles.h"
 #include "main.h"
-int KeyboardActionWaitTime = 0;
-int KeyboardElementEngraveTime = 0;
-int fileOpenTime = 0;
-int ShortCutTime = 0;
-ExeCurtState_typedef ExeCurtState;
-int currentFileIndex = 0;
-int fileRepetition = 0;
-int Status = false;
-int KeyboardShorcutStep = 0;
+
+//defines
+
+typedef enum {
+    OpeningFileSelectMenuState = 0,
+    AfterKeyPressedDelayState,
+    WaitForFileMenuToBeLoadedState,
+    WritingFileName,
+    WaitingToLoadFileState,
+    ExeFileCheckState,
+    ExeFileState,
+    ExeFileDelay,
+    ExecutionCompleted
+} eExecutionTaskState;
+
+//constants 
+
+
+//varialbles 
+
+
+eExecutionTaskState ExeCurtState;
+static int KeyboardActionWaitTime = 0;
+static int KeyboardElementEngraveTime = 0;
+static int fileOpenTime = 0;
+static int ShortcutTime = 0;
+static int currentFileIndex = 0;
+static int fileRepetition = 0;
+static int Status = false;
+static int KeyboardShorcutStep = 0;
 // Time to wait before sending next file
 void Keyboard_setup()
 {
@@ -20,62 +41,65 @@ void Keyboard_setup()
 
 void Keyboard_loop()
 {
-    Status = Register(ReadHoldingRegisters, EmulatorControlAdrees);
+    Status = Register(ReadHoldingRegisters, HMIExecMenuControlButtons);
     switch (Status)
     {
-    case StartStatus:
+    case btnStartPressed :
         if (millis() - KeyboardActionWaitTime > KboardTickTime)
         {
             if (numFiles != 0)
             {
                 switch (ExeCurtState)
                 {
+                    
                 case OpeningFileSelectMenuState:
-                    if (KeyboardShorcutStep == 0)
-                    {
-                        Keyboard.write(KEY_ESC);
-                        Keyboard.write(KEY_ESC);
-                        Keyboard.write(KEY_ESC);
-                    }
+                   
                     switch (KeyboardShorcutStep)
                     {
+                         
                     case 1:
+                        // emulate left "ALT" key press
                         Keyboard.write(KEY_LEFT_ALT);
-                        ExeCurtState = OpeningFileSelectMenuState;
+                        ExeCurtState = AfterKeyPressedDelayState;
                         break;
-                    case 2:
-                        Keyboard.write(KEY_F);
                         
-                        ExeCurtState = OpeningFileSelectMenuState;
+                    case 2:
+                        // emulate "F" key  press 
+                        Keyboard.write(KEY_F); 
+                        ExeCurtState = AfterKeyPressedDelayState;
                         break;
                     case 3:
+                        // emulate "O" key press
                         Keyboard.write(KEY_O);
-                        ExeCurtState = OpeningFileSelectMenuState;
+                        ExeCurtState = AfterKeyPressedDelayState;
                         break;
-                    default:
+                    default:  
+                        // there is nothing to sent.G o to WaitForFileMenuToLoadState to give
+                        // enough time program to open " File Open " menu
                         KeyboardShorcutStep = 0;
-                        ExeCurtState = WaitForFileMenuToLoadState;
+                        ExeCurtState = WaitForFileMenuToBeLoadedState;
                         fileOpenTime = millis();
                         break;
                     }
-                    ShortCutTime = millis();
+                    ShortcutTime = millis();
                     break;
-                case OpeningFileSelectMenuDelay:
-                    if (millis() - ShortCutTime > KboardShortCutTime + KboardTickTime)
+                case AfterKeyPressedDelayState:
+                    if (millis() - ShortcutTime > KboardShortCutTime + KboardTickTime)
                     {
                         KeyboardShorcutStep++;
                         ExeCurtState = OpeningFileSelectMenuState;
                     }
-
                     break;
-                case WaitForFileMenuToLoadState:
+
+                case WaitForFileMenuToBeLoadedState:
                     if (millis() - fileOpenTime > FileMenuOpenTime + KboardTickTime)
                     {
                         ExeCurtState = WritingFileName;
                     }
                     break;
+
                 case WritingFileName:
-                    Keyboard.print(ReadFileName(currentFileIndex) + ".txt");
+                    Keyboard.print(ReadFileName(currentFileIndex));
                     Keyboard.write(KEY_RETURN);
                     ExeCurtState = WaitingToLoadFileState;
                     fileOpenTime = millis();
@@ -83,7 +107,7 @@ void Keyboard_loop()
                 case WaitingToLoadFileState:
                     if (millis() - fileOpenTime > FileOpenTime + KboardTickTime)
                     {
-                        ExeCurtState = ExeFileState;
+                        ExeCurtState = ExeFileCheckState;
                     }
                     break;
                 case ExeFileCheckState:
@@ -126,17 +150,17 @@ void Keyboard_loop()
                 {
                     currentFileIndex = 0;
                     ExeCurtState = OpeningFileSelectMenuState;
-                    Register(WriteHoldingRegisters, EmulatorControlAdrees, StopStatus);
-                    Status = StopStatus;
+                    Register(WriteHoldingRegisters, HMIExecMenuControlButtons, btnStopPressed);
+                    Status = btnStopPressed;
                 }
                 KeyboardActionWaitTime = millis();
             }
         }
         break;
-    case PauseStatus:
-        KeyboardShorcutStep = 0;
+    case btnPausePressed:
+        // do nothing 
         break;
-    case StopStatus:
+    case btnStopPressed:
         currentFileIndex = 0;
         KeyboardShorcutStep = 0;
         fileRepetition = 0;

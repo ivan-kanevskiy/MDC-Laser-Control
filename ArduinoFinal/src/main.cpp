@@ -46,10 +46,10 @@ void loop()
 }
 
 // Your main function that takes a boolean statement and a callback function
-void executeIfConditionIsTrue(int statement, int value, CallbackFunction func)
-{
-  if (statement == value)
-  {
-    func();
-  }
-}
+// void executeIfConditionIsTrue(int statement, int value, CallbackFunction func)
+// {
+//   if (statement == value)
+//   {
+//     func();
+//   }
+// }
