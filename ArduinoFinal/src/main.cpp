@@ -53,3 +53,10 @@ void loop()
 //     func();
 //   }
 // }
+// void executeIfConditionIsTrue(int statement, int value, CallbackFunction func)
+// {
+//   if (statement == value)
+//   {
+//     func();
+//   }
+// }

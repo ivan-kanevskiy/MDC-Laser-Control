@@ -9,6 +9,7 @@ ModbusRTUSlave modbus(Serial1, A1, A0);
 
 const uint32_t baudrate = 115200UL;
 
+
 uint16_t Register(int regType, int regNumber, uint16_t value)
 {
     switch (regType)

@@ -15,6 +15,10 @@ String decimalToHex(unsigned long decValue);
 static void LoadFilesFromDisp();
 
 
+
+static void LoadFilesFromDisp();
+
+
 void loopFilesFromDisp()
 {
     // check  "Send" button state
@@ -27,15 +31,29 @@ void loopFilesFromDisp()
     }
 
     // executeIfConditionIsTrue(Register(ReadCoils, SendDataButton), 1, LoadFilesFromDisp);
+    // check  "Send" button state
+    if(Register(ReadCoils, SendDataButton) == 1 )
+    {  // Pressed
+        // load data 
+        LoadFilesFromDisp();
+
+        Register(WriteCoils, SendDataButton, 0); // clear "Send" button state
+    }
+
+    // executeIfConditionIsTrue(Register(ReadCoils, SendDataButton), 1, LoadFilesFromDisp);
 }
+
 
 String ReadFileName(int FileIndex){
     return allFilenames[FileIndex];
 }
 
+
 int ReadFileRepetition(int FileIndex){
     return allRepetition[FileIndex];
 }
+
+static void LoadFilesFromDisp()
 
 static void LoadFilesFromDisp()
 {
@@ -46,10 +64,16 @@ static void LoadFilesFromDisp()
     //check how many rows are received from HMI 
     // the value 0 means that an empy row is reached 
     for (int i = 0; i < MaxRecCnt; i++)
+    //numRepetition = 0;
+
+    //check how many rows are received from HMI 
+    // the value 0 means that an empy row is reached 
+    for (int i = 0; i < MaxRecCnt; i++)
     {
 
         if (Register(ReadHoldingRegisters, ProgramRepeatRegister + i) != 0)
         {
+            numberOfdata++; // number of rows with  valid data 
             numberOfdata++; // number of rows with  valid data 
         }
     }
@@ -63,8 +87,10 @@ static void LoadFilesFromDisp()
     if (numberOfdata > 0)
     {
         // extract data from each row 
+        // extract data from each row 
         for (int i = 0; i < numberOfdata; i++)
         {
+            allRepetition[i] = Register(ReadHoldingRegisters, ProgramRepeatRegister + i);
             allRepetition[i] = Register(ReadHoldingRegisters, ProgramRepeatRegister + i);
             String buf;
             // for (int j = ProgramNameStaringRegister + i * ProgramNameLength; j < (ProgramNameStaringRegister + ProgramNameLength) + i * ProgramNameLength; j++)
@@ -74,8 +100,10 @@ static void LoadFilesFromDisp()
             //     buf += String(hexToAscii(decimalToHex(Register(ReadHoldingRegisters, j))));
             // }
             
+            
             for (int j = 0; j < ProgramNameLength; j++)
             {
+                
                 
                 if (Register(ReadHoldingRegisters, ProgramNameRegister + j + ProgramNameLength * i) == 0)
                     break;
@@ -83,6 +111,7 @@ static void LoadFilesFromDisp()
             }
             allFilenames[numFiles] = buf;
             numFiles++;
+            //numRepetition++;
             //numRepetition++;
             rtt.println(buf);
         }
@@ -100,7 +129,10 @@ static void LoadFilesFromDisp()
         }
     }
     
+    
 }
+
+
 
 
 String decimalToHex(unsigned long decValue)
