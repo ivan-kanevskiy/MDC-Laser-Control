@@ -97,11 +97,16 @@ void execution_setup()
 }
 
 
-
+/**
+ * @brief Main execution loop
+ * 
+ * This function is called in the main loop to handle the execution laser programs
+ * based on the HMI button states and other parameters.
+ */
 
 void execution_loop()
 {
-    eHMIExecProgramStatus = (eHMIExecButtonsState) GetHMIStatus();   //make sure that HMI send valid values for thin enum
+    eHMIExecProgramStatus = (eHMIExecButtonsState) GetHMIStatus();   //make sure that HMI send valid values for this enum
     
 
     switch (eHMIExecProgramStatus)

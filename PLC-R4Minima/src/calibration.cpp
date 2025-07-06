@@ -31,8 +31,8 @@
 
 typedef enum tHMICalibrationButtonState
 {
-    eHMIButtonNoPressed = 0,
-    eHMIButtonLeftPressed = 1,
+    eHMIButtonNoPressed    = 0,
+    eHMIButtonLeftPressed  = 1,
     eHMIButtonRightPressed = 2
 
 } eHMICalibrationButtonState;
