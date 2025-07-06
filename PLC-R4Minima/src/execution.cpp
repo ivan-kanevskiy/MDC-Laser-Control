@@ -59,18 +59,18 @@ void execution_loop()
                 {
                 case 1:
                     // emulate left "ALT" key press
-                    Keyboard.write(KEY_LEFT_ALT);
+                    //Keyboard.write(KEY_LEFT_ALT);
                     ExeCurtState = AfterKeyPressedDelayState;
                     break;
 
                 case 2:
                     // emulate "F" key  press
-                    Keyboard.write(KEY_F);
+                    //Keyboard.write(KEY_F);
                     ExeCurtState = AfterKeyPressedDelayState;
                     break;
                 case 3:
                     // emulate "O" key press
-                    Keyboard.write(KEY_O);
+                    //Keyboard.write(KEY_O);
                     ExeCurtState = AfterKeyPressedDelayState;
                     break;
                 default:
@@ -96,8 +96,8 @@ void execution_loop()
                 }
                 break;
             case WritingFileName:
-                Keyboard.print(ReadFileName(currentFileIndex));
-                Keyboard.write(KEY_RETURN);
+                //Keyboard.print(ReadFileName(currentFileIndex));
+                //Keyboard.write(KEY_RETURN);
                 ExeCurtState = WaitingToLoadFileState;
                 Timer = millis();
                 break;
@@ -128,7 +128,7 @@ void execution_loop()
                 }
                 break;
             case ExeFileState:
-                Keyboard.println(String(readMottorSteps()));
+                //Keyboard.println(String(readMottorSteps()));
                 //Keyboard.println("F2");
                 fileRepetition++;
                 Timer = millis();

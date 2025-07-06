@@ -6,7 +6,7 @@
 #define none 0
 #define Left 1
 #define Right 2
-#define OneMMInSteps 212
+#define ZerePointOneMMInSteps 21 // 0.1 mm in steps
 // varialbles
 
 const int STEP_PIN = SCK;
@@ -66,7 +66,7 @@ void motor_loop()
 void calibration_loop()
 {
     dir = Register(ReadHoldingRegisters, HMICalibDirectionButton);
-    rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * OneMMInSteps;
+    rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * ZerePointOneMMInSteps;
 
     switch (dir)
     {
