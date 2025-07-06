@@ -1,6 +1,7 @@
 #include "main.h"
 
 #define MaxRecCnt 10
+#define EmptyFileName "EmptyProgram.edz"
 
 
 uint16_t numFiles = 0;
@@ -14,8 +15,12 @@ String decimalToHex(unsigned long decValue);
 
 static void LoadFilesFromDisp();
 
+uint16_t GetNumberOfFileToExec()
+{
+    return numFiles;
+}
 
-void loopFilesFromDisp()
+void loadprogram_loop()
 {
     // check  "Send" button state
     if(Register(ReadCoils, SendDataButton) == 1 )
@@ -25,16 +30,41 @@ void loopFilesFromDisp()
 
         Register(WriteCoils, SendDataButton, 0); // clear "Send" button state
     }
-
-    // executeIfConditionIsTrue(Register(ReadCoils, SendDataButton), 1, LoadFilesFromDisp);
 }
-
-String ReadFileName(int FileIndex){
-    return allFilenames[FileIndex];
+/**
+ * @brief Get the File Name object
+ * 
+ * @param FileIndex - index of file in the list
+ * @return String 
+ */
+String GetFileName(const uint16_t FileIndex)
+{
+    String retValue = ""; 
+    if( FileIndex < MaxRecCnt )
+    { // param is valid value 
+        
+        retValue =  allFilenames[FileIndex];
+        
+    }
+   if(retValue == "")
+        retValue = EmptyFileName; // return empty file name
+        
+    return retValue;
 }
-
-int ReadFileRepetition(int FileIndex){
-    return allRepetition[FileIndex];
+/**
+ * @brief Returns how many times execution of program file should be repeated
+ * 
+ * @param FileIndex - index of file in the list
+ * @return int - number of repetitions for this file
+ */
+uint16_t GetFileRepeatNumber(const uint16_t FileIndex )
+{
+    int retValue = 0;
+    if (FileIndex < MaxRecCnt)
+    { // param is valid value
+        retValue = allRepetition[FileIndex];
+    }
+    return retValue;
 }
 
 static void LoadFilesFromDisp()

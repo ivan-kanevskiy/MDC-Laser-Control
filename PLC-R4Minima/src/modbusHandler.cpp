@@ -1,4 +1,28 @@
+//------------------------------------------------------------------------------
+// Included files to resolve specific definitions in this file
+//------------------------------------------------------------------------------
 #include "main.h"
+
+//------------------------------------------------------------------------------
+// Local constants
+//------------------------------------------------------------------------------
+
+#define EngraveTimeDefaultValue 20 // default engraving time in seconds
+#define NumberOfDetailsOnPlateDefaultValue 60 // default number of details on plate
+
+#define modbusBaudrate  ((uint32_t)115200UL) // Modbus baud rate
+
+//------------------------------------------------------------------------------
+// Local macros
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Local types
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Local data
+//------------------------------------------------------------------------------
 
 bool Coils[numCoils];
 bool discreteInputs[numDiscreteInputs];
@@ -7,7 +31,24 @@ uint16_t InputRegisters[numInputRegisters];
 
 ModbusRTUSlave modbus(Serial1, A1, A0);
 
-const uint32_t baudrate = 115200UL;
+
+//------------------------------------------------------------------------------
+// Constant local data
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Exported data
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Constant exported data
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Local function prototypes
+//------------------------------------------------------------------------------
+
+
 
 uint16_t Register(int regType, int regNumber, uint16_t value)
 {
@@ -68,16 +109,19 @@ uint16_t Register(int regType, int regNumber, uint16_t value)
 
     return 0; // Invalid register type or number
 }
+
+
+
 void modbus_setup()
 {
-    Serial1.begin(baudrate, SERIAL_8N1);
-    modbus.begin(4, baudrate, SERIAL_8N1);
+    Serial1.begin(modbusBaudrate, SERIAL_8N1);
+    modbus.begin(4, modbusBaudrate, SERIAL_8N1);
     modbus.configureCoils(Coils, numCoils);
     modbus.configureDiscreteInputs(discreteInputs, numDiscreteInputs);
     modbus.configureHoldingRegisters(HoldingRegisters, numHoldingRegisters);
     modbus.configureInputRegisters(InputRegisters, numInputRegisters);
-    Register(WriteHoldingRegisters, HMIExecMenuDelayButton, 20);
-    Register(WriteHoldingRegisters, HMIExecMenuNumberOfPlatesButton, 60);
+    Register(WriteHoldingRegisters, HMIExecMenuEngraveTimeButton, EngraveTimeDefaultValue);
+    Register(WriteHoldingRegisters, HMIExecMenuNumberOfPlatesButton, NumberOfDetailsOnPlateDefaultValue);
 }
 void modbus_loop()
 {

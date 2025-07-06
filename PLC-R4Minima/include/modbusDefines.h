@@ -23,7 +23,7 @@
 #define ProgramNameLength 20
 #define HMIExecMenuControlButtons 434
 #define HMIExecMenuNumberOfPlatesButton 435
-#define HMIExecMenuDelayButton 436
+#define HMIExecMenuEngraveTimeButton 436
 #define HMICalibButtonForRotationLength 437
 #define HMICalibDirectionButton 438
 #endif

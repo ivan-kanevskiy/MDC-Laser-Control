@@ -1,6 +1,6 @@
 #ifndef main_h
 #define main_h
-#include "rttstream.h"
+#include <RTTStream.h>
 #include "Arduino.h"
 
 #include "loadProgram.h"

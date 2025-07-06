@@ -1,40 +1,100 @@
+//------------------------------------------------------------------------------
+// Included files to resolve specific definitions in this file
+//------------------------------------------------------------------------------
 #include "main.h"
 #include <cmath>
-// defines
 
-#define StepperSpeed 500 // move half a degre
-#define none 0
-#define Left 1
-#define Right 2
-#define ZerePointOneMMInSteps 21 // 0.1 mm in steps
-// varialbles
+#include "AccelStepper.h"
+#include "calibration.h"
 
+//------------------------------------------------------------------------------
+// Local constants
+//------------------------------------------------------------------------------
+
+#define StepperSpeed 500 // move half a degree
+#define ZerePointOneMMInSteps 2 // 0.1 mm in steps for plate with radius 480
 #define STEP_PIN  SCK
 #define DIR_PIN  MISO
 
-uint16_t dir = 0;
-long rotationLength = 0;
+//------------------------------------------------------------------------------
+// Local macros
+//------------------------------------------------------------------------------
 
-AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
+#define GetHMICalibrationState()  Register(ReadHoldingRegisters, HMICalibDirectionButton)
+#define SetHMICalibrationState(x) Register(WriteHoldingRegisters, HMICalibDirectionButton, x)
+
+#define GetHMICalibrationRotationLength()  Register(ReadHoldingRegisters, HMICalibButtonForRotationLength)
+
+//------------------------------------------------------------------------------
+// Local types
+//------------------------------------------------------------------------------
+
+typedef enum tHMICalibrationButtonState
+{
+    eHMIButtonNoPressed = 0,
+    eHMIButtonLeftPressed = 1,
+    eHMIButtonRightPressed = 2
+
+} eHMICalibrationButtonState;
+ 
+//------------------------------------------------------------------------------
+// Local data
+//------------------------------------------------------------------------------
+
+static int errorAccumulator = 0;
+
+static eHMICalibrationButtonState HMICalibrationDirState = eHMIButtonNoPressed;
+static long rotationLength = 0;
+
+static AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
+
+//------------------------------------------------------------------------------
+// Constant local data
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Exported data
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Constant exported data
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Local function prototypes
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Local function prototypes
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// LOCAL FUNCTIONS  
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// EXPORTED FUNCTIONS  
+//------------------------------------------------------------------------------
 
 bool checkForErrorAndReturnTrueIfNeedToBeCorrected()
 {
-    static uint16_t plateNumber = Register(ReadHoldingRegisters, HMIExecMenuNumberOfPlatesButton); 
-    static int RoudDown = StepperFullRotation / plateNumber;
-    static int ErrorWhenRoundDown = StepperFullRotation - (plateNumber * RoudDown); 
+     int DetailNumOnPlate = 0;    // number on details on plate;   
+     // int RoudDown = 0;                 // steps for one detail on plate rounded down   
+     int ErrorWhenRoundDown = 0;       // missed steps for one full plate rotation. 
 
-    static int errorAccumulator = 0;
+     // Read number of detail on a plate from HMI
+    DetailNumOnPlate = Register(ReadHoldingRegisters, HMIExecMenuNumberOfPlatesButton); 
+    // calculate missed steps for one revolution of plate
+    ErrorWhenRoundDown = PlateFullRotationSteps % DetailNumOnPlate;
 
     errorAccumulator += ErrorWhenRoundDown;
 
-    if (errorAccumulator >= plateNumber) {
-        errorAccumulator -= plateNumber;
+    if (errorAccumulator >= DetailNumOnPlate) {
+        errorAccumulator -= DetailNumOnPlate;
         return true; 
     }
-    if (currentPlate >= plateNumber) {
-        currentPlate = 0;
-        errorAccumulator = 0;
-    }
+    
     return false;
 }
 
@@ -63,28 +123,34 @@ void motor_loop()
 {
     stepper.run();
 }
+
+/**
+ * @brief 
+ * 
+ */
 void calibration_loop()
 {
-    dir = Register(ReadHoldingRegisters, HMICalibDirectionButton);
+    HMICalibrationDirState = (eHMICalibrationButtonState)GetHMICalibrationState();
     rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * ZerePointOneMMInSteps;
 
-    switch (dir)
+    switch (HMICalibrationDirState)
     {
-    case Left:
+    case eHMIButtonLeftPressed:
         if (readMottorSpeed() == 0)
         {
             stepper.move(rotationLength);
-            Register(WriteHoldingRegisters, HMICalibDirectionButton, none);
-            dir = none;
+             
+            SetHMICalibrationState(eHMIButtonNoPressed);
+            HMICalibrationDirState = eHMIButtonNoPressed;
         }
         break;
-    case Right:
+    case eHMIButtonRightPressed:
         if (readMottorSpeed() == 0)
         {
-            stepper.setCurrentPosition(0);
+            
             stepper.move(rotationLength * -1);
-            Register(WriteHoldingRegisters, HMICalibDirectionButton, none);
-            dir = none;
+            SetHMICalibrationState(eHMIButtonNoPressed);
+            HMICalibrationDirState = eHMIButtonNoPressed;
         }
     default:
         if (readMottorSpeed() == 0)

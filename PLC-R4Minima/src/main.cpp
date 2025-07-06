@@ -15,13 +15,13 @@ void loop()
   motor_loop();
   // if (millis() - lastTick > tickTime)
   //{
-  switch (Register(ReadHoldingRegisters, windowRegistery)) // Example register read
+  switch (Register(ReadHoldingRegisters, windowRegistery)) // read current windows on HMI
   {
   case windowMain:
     //rtt.println("MAIN PROGRAM");
     break;
   case windowLoadProgram:
-    loopFilesFromDisp();
+    loadprogram_loop();
     //rtt.println("LOAD PROGRAM");
     break;
   case windowExecution:
@@ -45,11 +45,3 @@ void loop()
   // }
 }
 
-// Your main function that takes a boolean statement and a callback function
-// void executeIfConditionIsTrue(int statement, int value, CallbackFunction func)
-// {
-//   if (statement == value)
-//   {
-//     func();
-//   }
-// }
