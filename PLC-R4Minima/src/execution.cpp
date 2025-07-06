@@ -47,7 +47,9 @@ typedef enum tExecutionTaskState
     eExecFileState,
     eExecFileDelayState,
     eWaitForMottorMovementFinishState,
-    eExecDoneState
+    eExecDoneState,
+    eExecStopState,
+    eExecPausedState
 } eExecutionTaskState;
 
 //------------------------------------------------------------------------------
@@ -90,7 +92,7 @@ static int KeyboardShorcutStep = 0;
 void execution_setup()
 {
     Keyboard.begin();
-    ExeCurtState = eInitState;
+    ExeCurtState = eExecPausedState;
     KeyboardShorcutStep = 0;
     StepsForOneDetail = NumberOfDetailsOnPlateDefaultValue;
     
@@ -103,16 +105,9 @@ void execution_setup()
  * This function is called in the main loop to handle the execution laser programs
  * based on the HMI button states and other parameters.
  */
-
-void execution_loop()
+void execution_program_loop()
 {
-    eHMIExecProgramStatus = (eHMIExecButtonsState) GetHMIStatus();   //make sure that HMI send valid values for this enum
-    
-
-    switch (eHMIExecProgramStatus)
-    {
-    case eHMIButtonStartPressed:
-        if (GetNumberOfFileToExec() != 0)
+    if (GetNumberOfFileToExec() != 0)
         {
             unsigned long currentMillis = millis();
             switch (ExeCurtState)
@@ -244,35 +239,53 @@ void execution_loop()
                 // execution of all files is done   
                 // reset all variables to initial state
                
-                //{ moved to stop state
-                
-                // currentFileIndex = 0;
-                // fileExecutionCnt = 0;
-                // KeyboardShorcutStep = 0;
-                // ExeCurtState = eInitState;
-                // }
+           
+                ExeCurtState = eExecStopState;
             
-                
+                // set HMI to button stop state
                 SetHMIStatus(eHMIButtonStopPressed);
-                eHMIExecProgramStatus = eHMIButtonStopPressed;
+             case eExecStopState: 
+                  currentFileCnt = 0;
+                  KeyboardShorcutStep = 0;
+                  fileExecutionCnt = 0;  
 
+             break;
+                // eHMIExecProgramStatus = eHMIButtonStopPressed;
+
+                break;
+            case eExecPausedState:
+                // do nothing, just wait for HMI to change state
                 break;
             default:
                 break;
             }
              
         }
+
+}
+/**
+ * @brief Execution loop to handle HMI button states and change execution state accordingly
+ * 
+ * This function checks the current HMI button state and changes the execution state
+ * based on the button pressed.
+ */
+void execution_loop()
+{
+    eHMIExecProgramStatus = (eHMIExecButtonsState) GetHMIStatus();   //make sure that HMI send valid values for this enum
+    
+    switch (eHMIExecProgramStatus)
+    {
+    case eHMIButtonStartPressed:
+
+        ExeCurtState = eInitState; // set execution state to initial state
         break;
+
     case eHMIButtonPausePressed:
-        // do nothing
+        ExeCurtState = eExecPausedState; // set execution state to paused
         break;
+
     case eHMIButtonStopPressed:
-        // execution of all files is done   
-        // reset all variables to initial state
-        currentFileCnt = 0;
-        KeyboardShorcutStep = 0;
-        fileExecutionCnt = 0;
-        ExeCurtState = eInitState;
+        ExeCurtState = eExecStopState;
 
         break;
     default:
