@@ -9,8 +9,8 @@
 #define ZerePointOneMMInSteps 21 // 0.1 mm in steps
 // varialbles
 
-const int STEP_PIN = SCK;
-const int DIR_PIN = MISO;
+#define STEP_PIN  SCK
+#define DIR_PIN  MISO
 
 uint16_t dir = 0;
 long rotationLength = 0;
