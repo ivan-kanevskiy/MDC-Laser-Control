@@ -8,9 +8,9 @@ extern int currentPlate;
 #define btnStartPressed 1
 #define btnPausePressed 2
 #define btnStopPressed 3
-#define KboardShortCutTime 1000 
-#define FileMenuOpenTime 4000 
-#define FileOpenTime 5000 
+#define KboardShortCutTime 100 
+#define FileMenuOpenTime 400 
+#define FileOpenTime 500 
 #define KEY_F 0x46
 #define KEY_O 0x4F
 //#define OpenignFileSelectMenu 0

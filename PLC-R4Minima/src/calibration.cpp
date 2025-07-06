@@ -6,7 +6,7 @@
 #define none 0
 #define Left 1
 #define Right 2
-#define ZerePointOneMMInSteps 21 // 0.1 mm in steps
+#define ZeroPointOneMMInSteps 21 // 0.1 mm in steps
 // varialbles
 
 const int STEP_PIN = SCK;
@@ -20,8 +20,8 @@ AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 bool checkForErrorAndReturnTrueIfNeedToBeCorrected()
 {
     static uint16_t plateNumber = Register(ReadHoldingRegisters, HMIExecMenuNumberOfPlatesButton); 
-    static int RoudDown = StepperFullRotation / plateNumber;
-    static int ErrorWhenRoundDown = StepperFullRotation - (plateNumber * RoudDown); 
+    static int RoundDown = StepperFullRotation / plateNumber;
+    static int ErrorWhenRoundDown = StepperFullRotation - (plateNumber * RoundDown); 
 
     static int errorAccumulator = 0;
 
@@ -66,7 +66,7 @@ void motor_loop()
 void calibration_loop()
 {
     dir = Register(ReadHoldingRegisters, HMICalibDirectionButton);
-    rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * ZerePointOneMMInSteps;
+    rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * ZeroPointOneMMInSteps;
 
     switch (dir)
     {

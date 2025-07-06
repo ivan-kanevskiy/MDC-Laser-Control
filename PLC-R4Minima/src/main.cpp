@@ -2,6 +2,7 @@
 
 RTTStream rtt;
 long lastTick = 0;
+
 void setup()
 {
   modbus_setup();
