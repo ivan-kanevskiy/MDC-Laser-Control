@@ -3,10 +3,13 @@
 //------------------------------------------------------------------------------
 #include "main.h"
 #include <cmath>
-
 #include "AccelStepper.h"
 #include "calibration.h"
-
+#define StepperSpeed 500 // move half a degre
+#define none 0
+#define Left 1
+#define Right 2
+#define ZeroPointOneMMInSteps 21 // 0.1 mm in steps
 //------------------------------------------------------------------------------
 // Local constants
 //------------------------------------------------------------------------------
@@ -82,7 +85,6 @@ bool checkForErrorAndReturnTrueIfNeedToBeCorrected()
      int DetailNumOnPlate = 0;    // number on details on plate;   
      // int RoudDown = 0;                 // steps for one detail on plate rounded down   
      int ErrorWhenRoundDown = 0;       // missed steps for one full plate rotation. 
-
      // Read number of detail on a plate from HMI
     DetailNumOnPlate = Register(ReadHoldingRegisters, HMIExecMenuNumberOfPlatesButton); 
     // calculate missed steps for one revolution of plate
@@ -132,7 +134,6 @@ void calibration_loop()
 {
     HMICalibrationDirState = (eHMICalibrationButtonState)GetHMICalibrationState();
     rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * ZerePointOneMMInSteps;
-
     switch (HMICalibrationDirState)
     {
     case eHMIButtonLeftPressed:
