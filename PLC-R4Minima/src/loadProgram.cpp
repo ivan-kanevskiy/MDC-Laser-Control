@@ -19,7 +19,12 @@ uint16_t GetNumberOfFileToExec()
 {
     return numFiles;
 }
-
+/**
+ * @brief Load program data from HMI display
+ * 
+ * This function is called in the main loop to check if the "Send" button is pressed.
+ * If pressed, it proccess data received from  the HMI .
+ */
 void loadprogram_loop()
 {
     // check  "Send" button state
