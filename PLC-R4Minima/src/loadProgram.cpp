@@ -5,7 +5,7 @@
 
 
 uint16_t numFiles = 0;
-// int numRepetition = 0; // 
+
 
 uint16_t allRepetition[MaxRecCnt];
 String allFilenames[MaxRecCnt];
