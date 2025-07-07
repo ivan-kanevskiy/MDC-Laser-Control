@@ -20,7 +20,8 @@
 // Local macros
 //------------------------------------------------------------------------------
 #define GetHMIStatus()              Register(ReadHoldingRegisters, HMIExecMenuControlButtons) 
-#define SetHMIStatus(x)             Register(WriteHoldingRegisters, HMIExecMenuControlButtons, x)
+#define ClearHMIStatus()            Register(ReadHoldingRegisters, HMIExecMenuControlButtons, eHMIButtonNoPressed) 
+#define SetHMIStatus(x)             Register(WriteHoldingRegisters, HMIxecMenuControlReturn, x)
 #define GetNumberOfDetailOnPlate()  Register(ReadHoldingRegisters, HMIExecMenuNumberOfPlatesButton)
 #define GetEngraveTime()            Register(ReadHoldingRegisters, HMIExecMenuEngraveTimeButton)
 
@@ -243,7 +244,7 @@ void execution_program_loop()
                 ExeCurtState = eExecStopState;
             
                 // set HMI to button stop state
-                SetHMIStatus(eHMIButtonStopPressed);
+                //SetHMIStatus(eHMIButtonStopPressed);
              case eExecStopState: 
                   currentFileCnt = 0;
                   KeyboardShorcutStep = 0;
@@ -278,14 +279,22 @@ void execution_loop()
     case eHMIButtonStartPressed:
 
         ExeCurtState = eInitState; // set execution state to initial state
+        SetHMIStatus(eHMIButtonStartPressed); // set HMI status to start pressed
+        ClearHMIStatus();
+
         break;
 
     case eHMIButtonPausePressed:
         ExeCurtState = eExecPausedState; // set execution state to paused
+        SetHMIStatus(eHMIButtonPausePressed); // set HMI status to pause pressed
+        ClearHMIStatus();
+
         break;
 
     case eHMIButtonStopPressed:
         ExeCurtState = eExecStopState;
+        SetHMIStatus(eHMIButtonStopPressed);// set HMI status to stop pressed 
+        ClearHMIStatus();
 
         break;
     default:
