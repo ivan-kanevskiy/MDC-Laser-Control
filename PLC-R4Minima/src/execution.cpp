@@ -20,7 +20,7 @@
 // Local macros
 //------------------------------------------------------------------------------
 #define GetHMIStatus()              Register(ReadHoldingRegisters, HMIExecMenuControlButtons) 
-#define ClearHMIStatus()            Register(ReadHoldingRegisters, HMIExecMenuControlButtons, eHMIButtonNoPressed) 
+#define ClearHMIStatus()            Register(WriteHoldingRegisters, HMIExecMenuControlButtons, eHMIButtonNoPressed) 
 #define SetHMIStatus(x)             Register(WriteHoldingRegisters, HMIxecMenuControlReturn, x)
 #define GetNumberOfDetailOnPlate()  Register(ReadHoldingRegisters, HMIExecMenuNumberOfPlatesButton)
 #define GetEngraveTime()            Register(ReadHoldingRegisters, HMIExecMenuEngraveTimeButton)

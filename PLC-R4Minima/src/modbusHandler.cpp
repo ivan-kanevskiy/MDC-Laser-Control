@@ -9,6 +9,7 @@
 
 #define EngraveTimeDefaultValue 20 // default engraving time in seconds
 #define NumberOfDetailsOnPlateDefaultValue 60 // default number of details on plate
+#define ExecMenuDefaultState 3 // default number of details on plate
 
 #define modbusBaudrate  ((uint32_t)115200UL) // Modbus baud rate
 
@@ -122,6 +123,7 @@ void modbus_setup()
     modbus.configureInputRegisters(InputRegisters, numInputRegisters);
     Register(WriteHoldingRegisters, HMIExecMenuEngraveTimeButton, EngraveTimeDefaultValue);
     Register(WriteHoldingRegisters, HMIExecMenuNumberOfPlatesButton, NumberOfDetailsOnPlateDefaultValue);
+    Register(WriteHoldingRegisters, HMIxecMenuControlReturn, ExecMenuDefaultState);
 }
 void modbus_loop()
 {
