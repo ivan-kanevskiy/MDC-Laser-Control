@@ -5,17 +5,13 @@
 #include <cmath>
 #include "AccelStepper.h"
 #include "calibration.h"
-#define StepperSpeed 500 // move half a degre
-#define none 0
-#define Left 1
-#define Right 2
-#define ZeroPointOneMMInSteps 21 // 0.1 mm in steps
+
 //------------------------------------------------------------------------------
 // Local constants
 //------------------------------------------------------------------------------
 
 #define StepperSpeed 500 // move half a degree
-#define ZerePointOneMMInSteps 2 // 0.1 mm in steps for plate with radius 480
+#define ZeroPointOneMMInSteps 2 // 0.1 mm in steps for plate with radius 480
 #define STEP_PIN  SCK
 #define DIR_PIN  MISO
 
@@ -133,14 +129,13 @@ void motor_loop()
 void calibration_loop()
 {
     HMICalibrationDirState = (eHMICalibrationButtonState)GetHMICalibrationState();
-    rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * ZerePointOneMMInSteps;
+    rotationLength = Register(ReadHoldingRegisters, HMICalibButtonForRotationLength) * ZeroPointOneMMInSteps;
     switch (HMICalibrationDirState)
     {
     case eHMIButtonLeftPressed:
         if (readMottorSpeed() == 0)
         {
             stepper.move(rotationLength);
-             
             SetHMICalibrationState(eHMIButtonNoPressed);
             HMICalibrationDirState = eHMIButtonNoPressed;
         }
