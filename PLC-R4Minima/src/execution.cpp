@@ -208,7 +208,7 @@ void execution_program_loop()
                 break;
             case eExecFileState:
                 //Keyboard.println(String(readMottorSteps()));
-                Keyboard.println(KEY_F2); // send F2 key to start engraving
+                Keyboard.write(KEY_F2); // send F2 key to start engraving
                 fileExecutionCnt++;
                 Timer = millis();
                 ExeCurtState = eExecFileDelayState;
