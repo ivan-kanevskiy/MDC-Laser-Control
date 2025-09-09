@@ -244,7 +244,8 @@ void execution_program_loop()
                 ExeCurtState = eExecStopState;
             
                 // set HMI to button stop state
-                //SetHMIStatus(eHMIButtonStopPressed);
+                SetHMIStatus(eHMIButtonStopPressed);
+                break;
              case eExecStopState: 
                   currentFileCnt = 0;
                   KeyboardShorcutStep = 0;
@@ -253,7 +254,6 @@ void execution_program_loop()
              break;
                 // eHMIExecProgramStatus = eHMIButtonStopPressed;
 
-                break;
             case eExecPausedState:
                 // do nothing, just wait for HMI to change state
                 break;
