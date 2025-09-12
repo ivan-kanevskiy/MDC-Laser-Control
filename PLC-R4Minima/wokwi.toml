@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+elf = ".pio/build/uno_r4_minima/firmware.elf"
+firmware = ".pio/build/uno_r4_minima/firmware.bin"
+rfc2217ServerPort = 4000

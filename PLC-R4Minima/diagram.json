@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "author": "Navi mavi",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 39, "left": 95.4, "attrs": {} },
+    {
+      "type": "wokwi-serial-port",
+      "id": "serial",
+      "top": 200,
+      "left": 150,
+      "attrs": { "baud": "115200" }
+    }
+  ],
+  "connections": [
+    [ "uno:1", "serial:RX", "", [] ],
+    [ "uno:0", "serial:TX", "", [] ]
+  ],
+  "dependencies": {}
+}
