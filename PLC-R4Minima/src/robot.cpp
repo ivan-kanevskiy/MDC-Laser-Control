@@ -131,7 +131,7 @@ void robot_porgram_loop()
             break;
         
         case eExecFileCheckState:
-            if (currentStepsCnt <= numberOfSteps)
+            if (currentStepsCnt <= numberOfSteps -1 )
             {
                 RobotCurtState = eOpeningFileSelectMenuState;
             }
