@@ -52,7 +52,6 @@ typedef enum tRobotTaskState
     eExecFileState,
     eExecFileDelayState,
     eWaitForRobotImpulse,
-    eExecFileCheckStateAfterRobotImpulse,
     eExecDoneState,
     eExecStopState,
     eExecPausedState
@@ -120,7 +119,26 @@ void robot_porgram_loop()
             // Engrave wait time
             numberOfSteps = GetHMINumOfSteps();
 
-            RobotCurtState = eOpeningFileSelectMenuState;
+            RobotCurtState = eWaitForRobotImpulse;
+            break;
+        case eWaitForRobotImpulse:
+            // check if robot sent impulse that it has finished rotation
+            if (robotFinishedRotation == true)
+            {
+                robotFinishedRotation = false;
+                RobotCurtState = eExecFileCheckState;
+            }
+            break;
+        
+        case eExecFileCheckState:
+            if (currentStepsCnt <= numberOfSteps)
+            {
+                RobotCurtState = eOpeningFileSelectMenuState;
+            }
+            else
+            {
+                RobotCurtState = eExecDoneState;
+            }
             break;
         case eOpeningFileSelectMenuState:
 
@@ -179,46 +197,15 @@ void robot_porgram_loop()
         case eWaitingToLoadFileState:
             if (currentMillis - Timer >= LoadFileWaitTime)
             {
-                RobotCurtState = eExecFileCheckState;
-            }
-            break;
-
-        case eExecFileCheckState:
-            if (currentStepsCnt <= numberOfSteps)
-            {
                 RobotCurtState = eExecFileState;
             }
-            else
-            {
-                RobotCurtState = eExecDoneState;
-            }
-
             break;
         case eExecFileState:
             // Keyboard.println(String(readMottorSteps()));
             Keyboard.write(KEY_F2); // send F2 key to start engraving
             currentStepsCnt++;
             Timer = millis();
-            RobotCurtState = eWaitForRobotImpulse;
-            break;
-        case eWaitForRobotImpulse:
-            // check if robot sent impulse that it has finished rotation
-            if (robotFinishedRotation == true)
-            {
-                robotFinishedRotation = false;
-                RobotCurtState = eExecFileCheckStateAfterRobotImpulse;
-            }
-            break;
-        case eExecFileCheckStateAfterRobotImpulse:
-            // check if there are more steps to do
-            if (currentStepsCnt <= numberOfSteps - 1)
-            {
-                RobotCurtState = eOpeningFileSelectMenuState;
-            }
-            else
-            {
-                RobotCurtState = eExecDoneState;
-            }
+            RobotCurtState = eExecFileCheckStateAfterRobotImpulse;
             break;
         case eExecDoneState:
             // execution of all files is done
