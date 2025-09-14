@@ -205,7 +205,7 @@ void robot_porgram_loop()
             Keyboard.write(KEY_F2); // send F2 key to start engraving
             currentStepsCnt++;
             Timer = millis();
-            RobotCurtState = eExecFileCheckStateAfterRobotImpulse;
+            RobotCurtState = eWaitForRobotImpulse;
             break;
         case eExecDoneState:
             // execution of all files is done
