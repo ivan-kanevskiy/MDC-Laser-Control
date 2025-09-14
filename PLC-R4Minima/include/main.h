@@ -8,7 +8,7 @@
 #include "modbusHandler.h"
 #include "execution.h"
 #include "calibration.h"
-
+#include "robot.h"
 extern RTTStream rtt;
 #define tickTime 100
 
@@ -18,6 +18,7 @@ extern RTTStream rtt;
 #define windowExecution 3
 #define windowCalibration 4
 #define windowSetup 5
+#define windowRobot 6
 typedef void (*CallbackFunction)();
 extern void executeIfConditionIsTrue(int statement, int value, CallbackFunction func);
 #endif

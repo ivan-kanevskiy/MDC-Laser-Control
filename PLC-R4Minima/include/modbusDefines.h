@@ -26,6 +26,11 @@
 #define HMIExecMenuEngraveTimeButton 436
 #define HMICalibButtonForRotationLength 437
 #define HMICalibDirectionButton 438
-#define HMIxecMenuControlReturn 439
+#define HMIExecMenuControlReturn 439
+#define HMIRobotMenuNumOfSteps 440
+#define HMIRobotMenuControl 441
+#define HMIRobotMenuControlReturn 442
+
+
 
 #endif
