@@ -13,21 +13,23 @@
 #define KEY_F 0x46
 #define KEY_O 0x4F
 
-#define KboardShortCutTime 1000 // time to wait between key presses to open "File Open" menu
-#define FileMenuOpenTime 4000   // time to wait for "File Open" menu to be opened
-#define LoadFileWaitTime 5000   // time to wait for file to be loaded
+#define KboardShortCutTime 1000 // time to wait between key presses to open "File Open" menu in ms
+#define FileMenuOpenTime 4000   // time to wait for "File Open" menu to be opened in ms
+#define LoadFileWaitTime 5000   // time to wait for file to be loaded in ms 
 
 #define debounceTime 1000
 //------------------------------------------------------------------------------
 // Local macros
 //------------------------------------------------------------------------------
 
-#define GetHMIRobotStatus() Register(ReadHoldingRegisters, HMIRobotMenuControl)
-#define GetHMINumOfSteps() Register(ReadHoldingRegisters, HMIRobotMenuNumOfSteps)
+#define GetHMIRobotMenuButtonsStatus() Register(ReadHoldingRegisters, HMIRobotMenuControl) // returns   buttons pressed status  : 1 == Start, 2 == Pause, 3 == Stop
+#define GetHMINumOfSteps() Register(ReadHoldingRegisters, HMIRobotMenuNumOfSteps) // returns number of steps to engrave. Get this value from HMI screen
 
-#define ClearHMIStatus() Register(WriteHoldingRegisters, HMIRobotMenuControl, eHMIButtonNoPressed)
-#define SetHMIRobotStatus(x) Register(WriteHoldingRegisters, HMIRobotMenuControlReturn, x)
+#define ClearHMIStatus() Register(WriteHoldingRegisters, HMIRobotMenuControl, eHMIButtonNoPressed) // clear   buttons status
+#define SetHMIRobotStatus(x) Register(WriteHoldingRegisters, HMIRobotMenuControlReturn, x) // used to return current status of robot program to HMI . This is status is visualized on HMI screen
 
+
+#define IsSignalFromRobotDetected() (SignalFromRobot == true)
 //------------------------------------------------------------------------------
 // Local types
 //------------------------------------------------------------------------------
@@ -60,10 +62,11 @@ typedef enum tRobotTaskState
 //------------------------------------------------------------------------------
 // Local data
 //------------------------------------------------------------------------------
+
 static eRobotTaskState RobotCurtState;
 static eHMIRobotButtonsState eHMIRobotProgramStatus = eHMIButtonNoPressed;
 
-static String fileList[5] = {"STEP-1.edz", "STEP-2.edz", "STEP-3.edz", "STEP-4.edz", "STEP-5.edz"};
+static String fileNameList[5] = {"STEP-1.edz", "STEP-2.edz", "STEP-3.edz", "STEP-4.edz", "STEP-5.edz"};
 
 static int numberOfSteps = 0;
 static int currentStepsCnt = 0;
@@ -71,8 +74,10 @@ static int currentStepsCnt = 0;
 static int KeyboardShorcutStep = 0;
 static unsigned long Timer = 0;
 
-static bool robotFinishedRotation = false;
-static int RobotLastImpulse = millis();
+static bool SignalFromRobot = false;
+
+
+static unsigned long RobotLastImpulse = millis();
 //------------------------------------------------------------------------------
 // Constant local data
 //------------------------------------------------------------------------------
@@ -93,7 +98,7 @@ void robot_interupt_sec();
 
 void robot_setup()
 {
-    RobotCurtState = eExecPausedState;
+    RobotCurtState = eExecStopState;
     eHMIRobotProgramStatus = eHMIButtonNoPressed;
     pinMode(RobotStatusPin, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_interupt_first, RISING);
@@ -110,15 +115,18 @@ void robot_interupt_first()
 }
 void robot_interupt_sec()
 { 
-    if (millis() - RobotLastImpulse > 200 && millis() - RobotLastImpulse > 500 && RobotCurtState == eWaitForRobotImpulse)
+    if ( (millis() - RobotLastImpulse > 200   ) && 
+         (millis() - RobotLastImpulse <= 1000 ) &&
+         (RobotCurtState == eWaitForRobotImpulse) 
+        )
     {
-        robotFinishedRotation = true;
+        SignalFromRobot = true;
         Serial.println("interupted pt.2");
         RobotLastImpulse = millis();
     }
 }
 
-void robot_porgram_loop()
+void robot_program_loop()
 {
     if (GetHMINumOfSteps() > 0)
     {
@@ -127,15 +135,15 @@ void robot_porgram_loop()
         {
         case eInitState:
             // Engrave wait time
-            numberOfSteps = GetHMINumOfSteps();
-
-            RobotCurtState = eWaitForRobotImpulse;
+            numberOfSteps = GetHMINumOfSteps(); //get how many steps to engrave from HMI
+            RobotCurtState = eWaitForRobotImpulse; 
             break;
+
         case eWaitForRobotImpulse:
-            // check if robot sent impulse that it has finished rotation
-            if (robotFinishedRotation == true)
+            // wainting for signal from robot. After recieving of the signal program for execution should be sent to PC
+            if (SignalFromRobot == true)
             {
-                robotFinishedRotation = false;
+                SignalFromRobot = false;
                 RobotCurtState = eExecFileCheckState;
             }
             break;
@@ -195,7 +203,7 @@ void robot_porgram_loop()
             break;
         case eWritingFileNameState:
             // write file name in the "File Open" menu
-            Keyboard.print(fileList[currentStepsCnt]);
+            Keyboard.print(fileNameList[currentStepsCnt]);
             // press ENTER key to select file
             Keyboard.write(KEY_RETURN);
             // go to wait state because computer takes some time to open file
@@ -248,7 +256,7 @@ void robot_porgram_loop()
 
 void robot_loop()
 {
-    eHMIRobotProgramStatus = (eHMIRobotButtonsState)GetHMIRobotStatus(); // make sure that HMI send valid values for this enum
+    eHMIRobotProgramStatus = (eHMIRobotButtonsState)GetHMIRobotMenuButtonsStatus(); // make sure that HMI send valid values for this enum
 
     switch (eHMIRobotProgramStatus)
     {
@@ -273,5 +281,5 @@ void robot_loop()
     default:
         break;
     }
-    robot_porgram_loop();
+    robot_program_loop();
 }
