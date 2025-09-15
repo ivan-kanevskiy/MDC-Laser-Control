@@ -88,22 +88,32 @@ static int RobotLastImpulse = millis();
 //------------------------------------------------------------------------------
 // Local function prototypes
 //------------------------------------------------------------------------------
-void robot_interupt();
+void robot_interupt_first();
+void robot_interupt_sec();
 
 void robot_setup()
 {
     RobotCurtState = eExecPausedState;
     eHMIRobotProgramStatus = eHMIButtonNoPressed;
     pinMode(RobotStatusPin, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_interupt, RISING);
+    attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_interupt_first, RISING);
+    attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_interupt_sec, FALLING);
 }
 
-void robot_interupt()
-{
-    if (millis() - RobotLastImpulse > debounceTime && RobotCurtState == eWaitForRobotImpulse)
+void robot_interupt_first()
+{ 
+    if (RobotCurtState == eWaitForRobotImpulse)
+    {
+        Serial.println("interupted pt.1");
+        RobotLastImpulse = millis();
+    }
+}
+void robot_interupt_sec()
+{ 
+    if (millis() - RobotLastImpulse > 200 && millis() - RobotLastImpulse > 500 && RobotCurtState == eWaitForRobotImpulse)
     {
         robotFinishedRotation = true;
-        Serial.println("interupted");
+        Serial.println("interupted pt.2");
         RobotLastImpulse = millis();
     }
 }
