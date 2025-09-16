@@ -15,7 +15,7 @@
 
 #define KboardShortCutTime 1000 // time to wait between key presses to open "File Open" menu in ms
 #define FileMenuOpenTime 4000   // time to wait for "File Open" menu to be opened in ms
-#define LoadFileWaitTime 5000   // time to wait for file to be loaded in ms 
+#define LoadFileWaitTime 5000   // time to wait for file to be loaded in ms
 
 #define debounceTime 1000
 //------------------------------------------------------------------------------
@@ -23,11 +23,10 @@
 //------------------------------------------------------------------------------
 
 #define GetHMIRobotMenuButtonsStatus() Register(ReadHoldingRegisters, HMIRobotMenuControl) // returns   buttons pressed status  : 1 == Start, 2 == Pause, 3 == Stop
-#define GetHMINumOfSteps() Register(ReadHoldingRegisters, HMIRobotMenuNumOfSteps) // returns number of steps to engrave. Get this value from HMI screen
+#define GetHMINumOfSteps() Register(ReadHoldingRegisters, HMIRobotMenuNumOfSteps)          // returns number of steps to engrave. Get this value from HMI screen
 
 #define ClearHMIStatus() Register(WriteHoldingRegisters, HMIRobotMenuControl, eHMIButtonNoPressed) // clear   buttons status
-#define SetHMIRobotStatus(x) Register(WriteHoldingRegisters, HMIRobotMenuControlReturn, x) // used to return current status of robot program to HMI . This is status is visualized on HMI screen
-
+#define SetHMIRobotStatus(x) Register(WriteHoldingRegisters, HMIRobotMenuControlReturn, x)         // used to return current status of robot program to HMI . This is status is visualized on HMI screen
 
 #define IsSignalFromRobotDetected() (SignalFromRobot == true)
 //------------------------------------------------------------------------------
@@ -75,7 +74,7 @@ static int KeyboardShorcutStep = 0;
 static unsigned long Timer = 0;
 
 static bool SignalFromRobot = false;
-
+static bool StratSingnalFromRobot = false;
 
 static unsigned long RobotLastImpulse = millis();
 //------------------------------------------------------------------------------
@@ -93,41 +92,56 @@ static unsigned long RobotLastImpulse = millis();
 //------------------------------------------------------------------------------
 // Local function prototypes
 //------------------------------------------------------------------------------
-void robot_interupt_first();
-void robot_interupt_sec();
+void robot_impulse_check();
+void robot_interupt_falling();
 
 void robot_setup()
 {
     RobotCurtState = eExecStopState;
     eHMIRobotProgramStatus = eHMIButtonNoPressed;
     pinMode(RobotStatusPin, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_interupt_first, RISING);
-    attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_interupt_sec, FALLING);
+    // attachInterrupt(digitalPinToInterrupt(RobotStatusPin),robot_interupt_falling , FALLING);
+    // attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_impulse_check, FALLING);
 }
 
-void robot_interupt_first()
-{ 
+void robot_interupt_falling()
+{
     if (RobotCurtState == eWaitForRobotImpulse)
     {
-        Serial.println("interupted pt.1");
-        RobotLastImpulse = millis();
+        
     }
+    Serial.print("interupt");
 }
-void robot_interupt_sec()
-{ 
-    if ( (millis() - RobotLastImpulse > 200   ) && 
-         (millis() - RobotLastImpulse <= 1000 ) &&
-         (RobotCurtState == eWaitForRobotImpulse) 
-        )
-    {
-        SignalFromRobot = true;
-        Serial.println("interupted pt.2");
-        RobotLastImpulse = millis();
+void robot_impulse_check()
+{   
+    if(analogRead(RobotStatusPin) <= 20)
+    {   
+        if(StratSingnalFromRobot == true){
+            //StratSingnalFromRobot = false;
+        }else{
+            StratSingnalFromRobot = true;
+            RobotLastImpulse = millis();
+        }
+
     }
+    else if (analogRead(RobotStatusPin) >= 150)
+    {
+        if ((millis() - RobotLastImpulse > 200) &&
+            (millis() - RobotLastImpulse <= 1000) &&
+            (RobotCurtState == eWaitForRobotImpulse) &&
+            (StratSingnalFromRobot == true))
+        {
+            SignalFromRobot = true;
+            RobotLastImpulse = millis();
+        }
+        StratSingnalFromRobot = false;
+    }
+    //Serial.println(millis() - RobotLastImpulse);
 }
 
 void robot_program_loop()
 {
+    // Serial.println(analogRead(RobotStatusPin));
     if (GetHMINumOfSteps() > 0)
     {
         unsigned long currentMillis = millis();
@@ -135,8 +149,8 @@ void robot_program_loop()
         {
         case eInitState:
             // Engrave wait time
-            numberOfSteps = GetHMINumOfSteps(); //get how many steps to engrave from HMI
-            RobotCurtState = eWaitForRobotImpulse; 
+            numberOfSteps = GetHMINumOfSteps(); // get how many steps to engrave from HMI
+            RobotCurtState = eWaitForRobotImpulse;
             break;
 
         case eWaitForRobotImpulse:
@@ -146,10 +160,11 @@ void robot_program_loop()
                 SignalFromRobot = false;
                 RobotCurtState = eExecFileCheckState;
             }
+            robot_impulse_check();
             break;
-        
+
         case eExecFileCheckState:
-            if (currentStepsCnt <= numberOfSteps -1 )
+            if (currentStepsCnt <= numberOfSteps - 1)
             {
                 RobotCurtState = eOpeningFileSelectMenuState;
             }
@@ -247,10 +262,6 @@ void robot_program_loop()
         default:
             break;
         }
-    }
-    else
-    {
-        RobotCurtState = eExecStopState;
     }
 }
 
