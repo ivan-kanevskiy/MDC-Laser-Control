@@ -8,14 +8,14 @@
 //------------------------------------------------------------------------------
 // Local constants
 //------------------------------------------------------------------------------
-#define RobotStatusPin A2
+#define RobotStatusPin A4
 
 #define KEY_F 0x46
 #define KEY_O 0x4F
 
-#define KboardShortCutTime 1000 // time to wait between key presses to open "File Open" menu in ms
-#define FileMenuOpenTime 4000   // time to wait for "File Open" menu to be opened in ms
-#define LoadFileWaitTime 5000   // time to wait for file to be loaded in ms
+#define KboardShortCutTime 000 // time to wait between key presses to open "File Open" menu in ms
+#define FileMenuOpenTime 1000  // time to wait for "File Open" menu to be opened in ms
+#define LoadFileWaitTime 1000  // time to wait for file to be loaded in ms
 
 #define debounceTime 1000
 //------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ typedef enum tRobotTaskState
 static eRobotTaskState RobotCurtState;
 static eHMIRobotButtonsState eHMIRobotProgramStatus = eHMIButtonNoPressed;
 
-static String fileNameList[5] = {"STEP-1.edz", "STEP-2.edz", "STEP-3.edz", "STEP-4.edz", "STEP-5.edz"};
+static String fileNameList[5] = {"STEP-1.ezd", "STEP-2.ezd", "STEP-3.ezd", "STEP-4.ezd", "STEP-5.ezd"};
 
 static int numberOfSteps = 0;
 static int currentStepsCnt = 0;
@@ -99,7 +99,7 @@ void robot_setup()
 {
     RobotCurtState = eExecStopState;
     eHMIRobotProgramStatus = eHMIButtonNoPressed;
-    pinMode(RobotStatusPin, INPUT_PULLUP);
+    pinMode(RobotStatusPin, INPUT_PULLDOWN);
     // attachInterrupt(digitalPinToInterrupt(RobotStatusPin),robot_interupt_falling , FALLING);
     // attachInterrupt(digitalPinToInterrupt(RobotStatusPin), robot_impulse_check, FALLING);
 }
@@ -108,25 +108,26 @@ void robot_interupt_falling()
 {
     if (RobotCurtState == eWaitForRobotImpulse)
     {
-        
     }
     Serial.print("interupt");
 }
 void robot_impulse_check()
-{   
-    if(analogRead(RobotStatusPin) <= 20)
-    {   
-        if(StratSingnalFromRobot == true){
-            //StratSingnalFromRobot = false;
-        }else{
+{
+    if (digitalRead(RobotStatusPin) == HIGH)
+    {
+        if (StratSingnalFromRobot == true)
+        {
+            // StratSingnalFromRobot = false;
+        }
+        else
+        {
             StratSingnalFromRobot = true;
             RobotLastImpulse = millis();
         }
-
     }
-    else if (analogRead(RobotStatusPin) >= 150)
+    else if (digitalRead(RobotStatusPin) == LOW)
     {
-        if ((millis() - RobotLastImpulse > 200) &&
+        if ((millis() - RobotLastImpulse > 100) &&
             (millis() - RobotLastImpulse <= 1000) &&
             (RobotCurtState == eWaitForRobotImpulse) &&
             (StratSingnalFromRobot == true))
@@ -136,12 +137,11 @@ void robot_impulse_check()
         }
         StratSingnalFromRobot = false;
     }
-    //Serial.println(millis() - RobotLastImpulse);
+    // Serial.println(millis() - RobotLastImpulse);
 }
 
 void robot_program_loop()
 {
-    // Serial.println(analogRead(RobotStatusPin));
     if (GetHMINumOfSteps() > 0)
     {
         unsigned long currentMillis = millis();
@@ -150,29 +150,31 @@ void robot_program_loop()
         case eInitState:
             // Engrave wait time
             numberOfSteps = GetHMINumOfSteps(); // get how many steps to engrave from HMI
-            RobotCurtState = eWaitForRobotImpulse;
+            RobotCurtState = eExecFileCheckState;
+            currentStepsCnt = 0;
+            KeyboardShorcutStep = 0;
             break;
 
+        case eExecFileCheckState:
+            if (currentStepsCnt < numberOfSteps)
+            {
+                RobotCurtState = eWaitForRobotImpulse;
+            }
+            else
+            {
+                RobotCurtState = eInitState;
+            }
+            break;
         case eWaitForRobotImpulse:
             // wainting for signal from robot. After recieving of the signal program for execution should be sent to PC
             if (SignalFromRobot == true)
             {
                 SignalFromRobot = false;
-                RobotCurtState = eExecFileCheckState;
+                RobotCurtState = eOpeningFileSelectMenuState;
             }
             robot_impulse_check();
             break;
 
-        case eExecFileCheckState:
-            if (currentStepsCnt <= numberOfSteps - 1)
-            {
-                RobotCurtState = eOpeningFileSelectMenuState;
-            }
-            else
-            {
-                RobotCurtState = eExecDoneState;
-            }
-            break;
         case eOpeningFileSelectMenuState:
 
             KeyboardShorcutStep++;
@@ -235,11 +237,12 @@ void robot_program_loop()
             break;
         case eExecFileState:
             // Keyboard.println(String(readMottorSteps()));
-            Keyboard.write(KEY_F2); // send F2 key to start engraving
+            // Keyboard.write(KEY_F2); // send F2 key to start engraving
             currentStepsCnt++;
             Timer = millis();
-            RobotCurtState = eWaitForRobotImpulse;
+            RobotCurtState = eExecFileCheckState;
             break;
+
         case eExecDoneState:
             // execution of all files is done
             // reset all variables to initial state
