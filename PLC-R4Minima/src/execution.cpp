@@ -33,7 +33,8 @@ typedef enum tHMIExecButtonsState
     eHMIButtonNoPressed = 0,
     eHMIButtonStartPressed = 1,
     eHMIButtonPausePressed = 2,
-    eHMIButtonStopPressed = 3
+    eHMIButtonStopPressed = 3,
+    eHMIButtonDonePressed = 4
 } eHMIExecButtonsState;
 
 typedef enum tExecutionTaskState
@@ -244,7 +245,7 @@ void execution_program_loop()
                 ExeCurtState = eExecStopState;
             
                 // set HMI to button stop state
-                SetHMIStatus(eHMIButtonStopPressed);
+                SetHMIStatus(eHMIButtonDonePressed);
                 break;
              case eExecStopState: 
                   currentFileCnt = 0;
