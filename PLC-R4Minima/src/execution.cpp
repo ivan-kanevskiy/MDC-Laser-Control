@@ -21,7 +21,7 @@
 //------------------------------------------------------------------------------
 #define GetHMIStatus()              Register(ReadHoldingRegisters, HMIExecMenuControlButtons) 
 #define ClearHMIStatus()            Register(WriteHoldingRegisters, HMIExecMenuControlButtons, eHMIButtonNoPressed) 
-#define SetHMIStatus(x)             Register(WriteHoldingRegisters, HMIxecMenuControlReturn, x)
+#define SetHMIStatus(x)             Register(WriteHoldingRegisters, HMIExecMenuControlReturn, x)
 #define GetNumberOfDetailOnPlate()  Register(ReadHoldingRegisters, HMIExecMenuNumberOfPlatesButton)
 #define GetEngraveTime()            Register(ReadHoldingRegisters, HMIExecMenuEngraveTimeButton)
 
