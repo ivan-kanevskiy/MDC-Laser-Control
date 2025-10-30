@@ -8,6 +8,7 @@ void setup()
   modbus_setup();
   execution_setup();
   calibration_setup();
+  robot_setup();
 }
 
 void loop()
@@ -34,6 +35,11 @@ void loop()
     case windowCalibration:
       calibration_loop();
       //rtt.println("CALIBRATION");
+      /* code */
+      break;
+    case windowRobot:
+      robot_loop();
+      //rtt.println("Robot");
       /* code */
       break;
     case windowSetup:

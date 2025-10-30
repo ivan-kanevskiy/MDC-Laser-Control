@@ -40,5 +40,6 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "python.analysis.enablePerfTelemetry": true
 }

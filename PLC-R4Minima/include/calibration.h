@@ -2,8 +2,8 @@
 #define calibration_h
 
 
-#define StepMotorReductorRate 10   // 10:1 reductor rate for stepper motor
-#define StepMotorDriverFullRotationSteps 6400 // 6400 steps for full rotation of stepper motor driver
+#define StepMotorReductorRate 1   // 10:1 reductor rate for stepper motor
+#define StepMotorDriverFullRotationSteps 40000 // 6400 steps for full rotation of stepper motor driver
 #define PlateFullRotationSteps (StepMotorDriverFullRotationSteps * StepMotorReductorRate)
 
 

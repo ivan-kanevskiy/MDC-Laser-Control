@@ -123,7 +123,8 @@ void modbus_setup()
     modbus.configureInputRegisters(InputRegisters, numInputRegisters);
     Register(WriteHoldingRegisters, HMIExecMenuEngraveTimeButton, EngraveTimeDefaultValue);
     Register(WriteHoldingRegisters, HMIExecMenuNumberOfPlatesButton, NumberOfDetailsOnPlateDefaultValue);
-    Register(WriteHoldingRegisters, HMIxecMenuControlReturn, ExecMenuDefaultState);
+    Register(WriteHoldingRegisters, HMIExecMenuControlReturn, ExecMenuDefaultState);
+    Register(WriteHoldingRegisters, HMIRobotMenuControlReturn, ExecMenuDefaultState);
 }
 void modbus_loop()
 {
